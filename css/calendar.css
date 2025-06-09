@@ -1,0 +1,134 @@
+.calendar-container {
+    width: 95%;
+    max-width: 360px;
+    margin: 10px auto;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+    padding: 15px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-sizing: border-box;
+    z-index: 100;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 16px;
+    z-index: 100;
+}
+
+.selectors {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+    margin-bottom: 0px;
+    width: 100%;
+}
+
+.selectors select {
+    font-size: 13px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.day, .day-name {
+    aspect-ratio: 1 / 1;
+    font-size: 11px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 500;
+    border-radius: 6px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.day-name {
+    background: none;
+    font-weight: bold;
+    color: #444;
+    cursor: default;
+}
+
+.full {
+    background-color: rgba(255, 0, 0, 0.75);
+    color: white;
+    pointer-events: none;
+}
+
+.open {
+    background-color: rgba(0, 128, 0, 0.75);
+    color: white;
+}
+
+.unavail {
+    background-color: rgba(255, 255, 255, 0.6);
+    color: #222;
+    pointer-events: none;
+}
+
+.selected {
+    background-color: rgba(0, 123, 255, 0.75);
+    color: white;
+}
+
+button {
+    padding: 8px 12px;
+    font-size: 13px;
+    border: none;
+    background-color: #3686F7;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 12px auto 0;
+    width: 100%;
+    max-width: 220px;
+    display: block;
+}
+
+button:disabled {
+    background-color: #ccc;
+}
+
+pre {
+    background: #f9f9f9;
+    padding: 6px;
+    font-size: 11px;
+    overflow-x: auto;
+    border-radius: 5px;
+    margin-top: 12px;
+}
+
+@media (max-width: 500px) {
+    .calendar-container {
+        max-width: 95%;
+        padding: 10px 10px;
+    }
+
+    .day, .day-name {
+        font-size: 10px;
+        aspect-ratio: 1 / 1; 
+    }
+
+    .selectors select {
+        font-size: 12px;
+        padding: 4px 7px;
+    }
+
+    button {
+        font-size: 12px;
+        padding: 7px 10px;
+        max-width: 200px;
+    }
+}
