@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="css/main.css">
+    <title>About AISAT</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .logo-container {
+            text-align: center;
+            padding: 20px 0;
+            background-color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .logo-container img {
+            max-width: 180px;
+            height: auto;
+        }
+        
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            cursor: pointer;
+            z-index: 20;
+        }
+        
+        .back-button img {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .content-container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #608BC1;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            color: #608BC1;
+            margin-top: 30px;
+        }
+        
+        p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .contact-info {
+            background-color: #f0f5ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        
+        .contact-info p {
+            margin: 5px 0;
+        }
+
+        /* Ensure the whole page is scrollable */
+        html, body {
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .page-container {
+            min-height: 100%;
+            padding-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="back-button" id="backButton">
+            <img src="img/arrow.png" alt="Back">
+        </div>
+        
+        <div class="logo-container">
+            <img src="img/aisat.png" alt="AISAT Logo">
+        </div>
+        
+        <div class="content-container">
+            <h1>About Us</h1>
+            
+            <div class="section">
+                <p>About shit</p>
+            </div>
+            
+            <div class="section">
+                <h2>Our Mission</h2>
+                <p>Mission shit</p>
+            </div>
+            
+            <div class="section">
+                <h2>Our Vision</h2>
+                <p>Vision shit</p>
+            </div>
+            
+            <div class="section">
+                <h2>Core Values</h2>
+                <p>
+                    • Excellence in education<br>
+                    • Integrity and professionalism<br>
+                    • Innovation and adaptability<br>
+                    • Social responsibility<br>
+                    • Student-centered learning
+                </p>
+            </div>
+            
+            <div class="section">
+                <h2>Our Programs</h2>
+                <p>AISAT offers a wide range of programs designed to prepare students for successful careers in the aviation, hospitality, and technology sectors. Our comprehensive curriculum combines theoretical knowledge with practical skills to ensure that graduates are ready to meet industry demands.</p>
+            </div>
+            
+            <div class="contact-info">
+                <h2>Contact Information</h2>
+                <p><strong>Address:</strong> AISAT Campus, Biringan barangay uwu, Philippines</p>
+                <p><strong>Phone:</strong> (082) 123-4567</p>
+                <p><strong>Email:</strong> info@aisat.edu.ph</p>
+                <p><strong>Website:</strong> www.aisat.edu.ph</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page is ready');
+            
+            // Back button handler
+            document.getElementById('backButton').addEventListener('click', function() {
+                console.log('Back button clicked');
+                
+                // Try multiple approaches to go back
+                try {
+                    // First try standard history back
+                    window.history.back();
+                    
+                    // If that doesn't work (after a small delay), try redirect
+                    setTimeout(function() {
+                        // Redirect to main page if still on about page
+                        if (window.location.href.indexOf('about.html') > -1) {
+                            window.location.href = 'main.html';
+                        }
+                    }, 300);
+                } catch (e) {
+                    console.error('Error navigating back:', e);
+                    // Fallback to direct navigation
+                    window.location.href = 'main.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
