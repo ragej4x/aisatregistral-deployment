@@ -1,0 +1,15 @@
+{
+    "date": "2025-01-01",
+    "time": "10:00",
+    "details": {
+        "name": "",
+        "track": null,
+        "section": null,
+        "id": null,
+        "schedule": "2025-01-01",
+        "method": "installment",
+        "payment": "cash",
+        "requestID": null,
+        "status": "pending"
+    }
+}

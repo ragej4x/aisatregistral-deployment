@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="css/calendar.css">
+    <link rel="stylesheet" href="css/main.css">
+    <title>Aisat Registration</title>
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+        }
+
+        .modal-content {
+            
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .close {
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .profile-form input {
+            width: 95%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .profile-form button {
+            background-color: #608BC1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .profile-form button:hover {
+            background-color: #608BC1;
+        }
+
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+
+        .receipt-content{
+            margin-top: -1%;
+        }
+    </style>
+</head>
+<body>
+    <div ><img class="aisat" src="img/aisat.png" alt="error"></div> 
+
+    <div class="container">
+        <div class="logo"></div>
+        <div class="header">
+            <div class="left">
+              <img id="arrow" src="img/arrow.png" alt="Back">
+            </div>
+            <div class="right">
+              <img id="notif" src="img/notification.png" alt="Notifications">
+              <img id="gear" src="img/gear.png" alt="Settings">
+              <img id="about" src="img/about.png" alt="About us">
+            </div>
+          </div>
+        
+          <div class="part2_5" style="display: none;">
+            <div class="calendar-container">
+                <div class="header">
+                <div class="selectors">
+                    <select id="monthSelect"></select>
+                    <select id="yearSelect"></select>
+                </div>
+                </div>
+                <div class="calendar" id="calendar"></div>
+                <button id="nextButton" disabled onclick="nextAction()">Next</button>
+            </div>  
+            </div>
+
+        <div class="part1">
+            <div class="button-container">
+            <div><button id="qbtn">Queue</button></div>
+            </div>
+        </div>
+        
+        <div class="part2">
+            <div class="button-container">
+            <div><button id="nowbtn">QUEUE</button></div>
+            
+            <div class="divider">
+                <span class="dot"></span>
+                <hr>
+            </div>
+            
+            <div><button id="appointbtn" onclick="    renderCalendar();">APPOINTMENT SCHEDULE</button></div>
+            </div>
+        </div>
+        
+        <div class="part3">
+            <div class="button-container">
+            <div><button id="shsbtn">SENIOR HIGH SCHOOL</button></div>
+            
+            <div class="divider">
+                <span class="dot"></span>
+                <hr>
+            </div>
+            
+            <div><button id="collegebtn">COLLEGE</button></div>
+            </div>
+        </div>
+
+        <div class="part5" style="display: none;">
+            <div class="button-container">
+                <button class="paybtn" id="expressbtn"><img src="img/express.png"> EXPRESS</button>
+                <button class="paybtn" id="promissorybtn"><img src="img/note.png"> REGULAR</button>
+                <button class="paybtn" id="prioritybtn" ><img src="img/prio.png"> PRIORITY</button>
+
+            </div>
+        </div>
+
+        <div class="part6" style="display: none;">
+            <button class="button" onclick="handlePaymentSelection('fullpayment');">Full Payment</button>
+            <button class="button" onclick="handlePaymentSelection('installment');">Installment</button>
+        </div>
+
+        <div class="part7">
+            <h5></h5>
+        </div>
+
+    </div>
+
+    <div id="receiptModal" class="modal">
+        <div class="modal-content receipt-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Registration Receipt</h2>
+                <span class="close" id="closeReceiptModal">&times;</span>
+            </div>
+            <div class="receipt-body">
+                <div class="receipt-logo">
+                    <img src="img/aisat.png" alt="AISAT" height="50">
+                </div>
+                <h3 class="receipt-title">Request Confirmation</h3>
+                <div class="receipt-divider"></div>
+                
+                <div class="receipt-info">
+                    <div class="receipt-row">
+                        <div class="receipt-label">Request ID:</div>
+                        <div class="receipt-value" id="receiptRequestId">--</div>
+                    </div>
+                    <div class="receipt-row">
+                        <div class="receipt-label">Name:</div>
+                        <div class="receipt-value" id="receiptName">--</div>
+                    </div>
+                    <div class="receipt-row">
+                        <div class="receipt-label">ID Number:</div>
+                        <div class="receipt-value" id="receiptIdNo">--</div>
+                    </div>
+                    <div class="receipt-row" id="courseRow">
+                        <div class="receipt-label" id="courseLabel">Course/Strand:</div>
+                        <div class="receipt-value" id="receiptCourse">--</div>
+                    </div>
+                    <div class="receipt-divider"></div>
+                    <div class="receipt-row">
+                        <div class="receipt-label">Schedule:</div>
+                        <div class="receipt-value" id="receiptSchedule">--</div>
+                    </div>
+                    <div class="receipt-row">
+                        <div class="receipt-label">Payment:</div>
+                        <div class="receipt-value" id="receiptPayment">--</div>
+                    </div>
+                    
+                    <div class="receipt-divider"></div>
+                    <div class="receipt-row">
+                        <div class="receipt-label">Status:</div>
+                        <div class="receipt-value receipt-status" id="receiptStatus">Pending</div>
+                    </div>
+                    <div class="receipt-divider"></div>
+                    <div class="receipt-row">
+                        <div class="receipt-label">Date:</div>
+                        <div class="receipt-value" id="receiptDate">--</div>
+                    </div>
+                </div>
+                
+                <div class="receipt-footer">
+                    <p class="receipt-note">Keep this information for your records</p>
+                    <button id="receiptDoneBtn" class="receipt-done-btn">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Profile Settings</h2>
+                <span class="close" id="closeProfileModal">&times;</span>
+            </div>
+            <div class="profile-form">
+                <input type="text" id="profileFirstName" placeholder="First Name">
+                <input type="text" id="profileMiddleName" placeholder="Middle Name">
+                <input type="text" id="profileLastName" placeholder="Surname">
+                <input type="text" id="profileIdno" placeholder="ID Number">
+                <input type="tel" id="profileCell" placeholder="Cell Phone (e.g., 09XX XXX XXXX)" pattern="(\+63|0)[0-9]{9,10}">
+                <input type="email" id="profileEmail" placeholder="Email">
+                <input type="password" id="currentPassword" placeholder="Current Password">
+                <input type="password" id="newPassword" placeholder="New Password">
+                <input type="password" id="confirmPassword" placeholder="Confirm New Password">
+                <button id="saveProfileBtn">Save Changes</button>
+                <button id="logoutBtn" class="logout-btn">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notificationsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Request Notifications</h2>
+                <span class="close" id="closeNotificationsModal">&times;</span>
+            </div>
+            <div class="notification-content">
+                <div class="current-calls">
+                    <h3>Status</h3>
+                    <p class="timer-info">Countdown timers show time remaining before auto-rejection (10 min).</p>
+                    <div id="currentCallsList" class="calls-list">
+                        <div class="loading-indicator">Loading...</div>
+                    </div>
+                </div>
+                <div class="waiting-list">
+                    <h3>Waiting List</h3>
+                    <p class="timer-info">Requests in queue - waiting to be called.</p>
+                    <div id="waitingListContainer" class="calls-list">
+                        <div class="loading-indicator">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script src="js/calendar.js"></script>
+<script src="js/request.js"></script>
+<script src="js/requestform.js"></script>
+<script src="js/main.js"></script>
+<script src="js/onesignal-init.js"></script>
+<script src="js/profile.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/receipt.js"></script>
+<script src="js/paymentform.js"></script>
+<script>
+    // Add About Us icon click handler
+    document.addEventListener('DOMContentLoaded', function() {
+        const aboutIcon = document.getElementById('about');
+        if (aboutIcon) {
+            aboutIcon.addEventListener('click', function() {
+                console.log('About icon clicked');
+                window.location.href = 'about.html';
+            });
+        }
+    });
+</script>
+
+<script>
+    // Make sure notification functions are globally accessible
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Setting up global notification function access');
+        
+        // Check if the notification icon exists
+        const notifIcon = document.getElementById('notif');
+        if (notifIcon) {
+            console.log('Notification icon found, setting up click handler');
+            
+            // Add a robust click handler
+            notifIcon.addEventListener('click', function(event) {
+                console.log('Notification icon clicked via DOM handler');
+                
+                // Try to directly open the modal first
+                const modal = document.getElementById('notificationsModal');
+                if (modal) {
+                    console.log('Opening modal directly');
+                    modal.style.display = 'block';
+                    
+                    // Try to call updateNotifications if it exists
+                    if (typeof window.updateNotifications === 'function') {
+                        console.log('Calling updateNotifications function');
+                        window.updateNotifications();
+                    } else {
+                        console.error('updateNotifications function not found');
+                    }
+                } else {
+                    console.error('Could not find notifications modal element');
+                    alert('Error: Notification system not available');
+                }
+            });
+        } else {
+            console.error('Notification icon not found when setting up global handler');
+        }
+    });
+</script>
+
+<script>
+    // Main handler for payment selection
+    function handlePaymentSelection(methodType) {
+        console.log("Payment selection handler called with method:", methodType);
+        
+        try {
+            // Hide the payment options screen first
+            const part6 = document.querySelector('.part6');
+            if (part6) part6.style.display = 'none';
+            
+            // Initialize registration data if needed
+            if (!window.registrationData) {
+                window.registrationData = {
+                    details: {},
+                    date: new Date().toISOString().split('T')[0],
+                    time: new Date().toTimeString().substring(0, 5)
+                };
+            }
+            
+            if (!window.registrationData.details) {
+                window.registrationData.details = {};
+            }
+            
+            // Set the payment method
+            window.registrationData.details.method = methodType;
+            window.registrationData.details.status = 'pending';
+            
+            console.log("Payment method set to:", methodType);
+            console.log("Registration data:", window.registrationData);
+            
+            // Browser processing
+            console.log("Using browser approach for payment processing");
+            if (typeof window.showPaymentForm === 'function') {
+                window.showPaymentForm(methodType === 'fullpayment' ? 'full' : 'installment');
+            } else {
+                processPayment(methodType);
+            }
+        } catch (e) {
+            console.error("Error in handlePaymentSelection:", e);
+            alert("There was an error processing your selection. Please try again.");
+        }
+        
+        return false; // Prevent default action
+    }
+    
+    // Process payment
+    function processPayment(methodType) {
+        console.log("Processing payment, method:", methodType);
+        
+        try {
+            // Get user data from localStorage
+            let userData = null;
+            try {
+                userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                console.log("User data loaded:", userData);
+            } catch (e) {
+                console.error("Error loading user data:", e);
+                userData = {};
+            }
+            
+            // Prepare data for receipt
+            const receiptData = {
+                details: {
+                    name: userData.name || 'N/A',
+                    id: userData.idno || 'N/A',
+                    idno: userData.idno || 'N/A',
+                    level: userData.level || 'N/A',
+                    course: userData.course || 'N/A',
+                    track: userData.track || userData.course || 'N/A',
+                    method: methodType,
+                    payment: window.registrationData.details.payment || 'regular',
+                    status: 'pending'
+                },
+                date: window.registrationData.date || new Date().toISOString().split('T')[0],
+                time: window.registrationData.time || new Date().toTimeString().substring(0, 5)
+            };
+            
+            // Generate a request ID
+            const paymentType = receiptData.details.payment || 'regular';
+            let prefix = 'R';
+            if (paymentType.toLowerCase() === 'express') {
+                prefix = 'E';
+            } else if (paymentType.toLowerCase() === 'priority') {
+                prefix = 'P';
+            }
+            const uniqueId = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            const requestId = `${prefix}-${uniqueId}`;
+            receiptData.details.requestID = requestId;
+            
+            // Update registration data
+            if (window.registrationData && window.registrationData.details) {
+                window.registrationData.details.requestID = requestId;
+            }
+            
+            console.log("Prepared receipt data:", receiptData);
+            
+            // Try the standard approach
+            if (typeof window.showReceipt === 'function') {
+                window.showReceipt(receiptData);
+            } else {
+                // Last resort direct DOM manipulation
+                displayReceipt(receiptData);
+            }
+        } catch (e) {
+            console.error("Error processing payment:", e);
+            alert("There was an error. Please try again.");
+        }
+    }
+    
+    // Display receipt using direct DOM manipulation
+    function displayReceipt(data) {
+        console.log("Displaying receipt directly");
+        
+        try {
+            // Get the receipt modal
+            const receiptModal = document.getElementById('receiptModal');
+            if (!receiptModal) {
+                console.error("Receipt modal not found");
+                alert("Could not display receipt. Please try again.");
+                return;
+            }
+            
+            // Populate receipt fields
+            const fields = {
+                'receiptRequestId': data.details.requestID || 'N/A',
+                'receiptName': data.details.name || 'N/A',
+                'receiptIdNo': data.details.idno || 'N/A',
+                'receiptCourse': data.details.course || data.details.track || 'N/A',
+                'receiptSchedule': `${data.date || ''} ${data.time || ''}`,
+                'receiptPayment': formatPaymentDisplay(data.details.payment, data.details.method),
+                'receiptStatus': data.details.status || 'Pending',
+                'receiptDate': new Date().toLocaleDateString()
+            };
+            
+            // Set field values
+            Object.keys(fields).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = fields[id];
+                } else {
+                    console.warn(`Element with id ${id} not found`);
+                }
+            });
+            
+            // Show the modal
+            receiptModal.style.display = 'block';
+            console.log("Receipt modal displayed");
+            
+            // Make sure it stays visible
+            setTimeout(function() {
+                if (receiptModal.style.display !== 'block') {
+                    console.log("Re-showing receipt modal");
+                    receiptModal.style.display = 'block';
+                }
+            }, 200);
+        } catch (e) {
+            console.error("Error displaying receipt:", e);
+            alert("There was an error displaying the receipt. Please try again.");
+        }
+    }
+    
+    // Helper function to format payment display
+    function formatPaymentDisplay(payment, method) {
+        let paymentDisplay = payment || 'Regular';
+        
+        // Capitalize first letter
+        paymentDisplay = paymentDisplay.charAt(0).toUpperCase() + paymentDisplay.slice(1).toLowerCase();
+        
+        // Normalize payment value
+        if (paymentDisplay.toLowerCase() === 'promissory') {
+            paymentDisplay = 'Regular';
+        }
+        
+        // Add method in parentheses
+        let methodDisplay = method || 'fullpayment';
+        if (methodDisplay === 'fullpayment') {
+            methodDisplay = 'Full Payment';
+        } else if (methodDisplay === 'installment') {
+            methodDisplay = 'Installment';
+        }
+        
+        return `${paymentDisplay} (${methodDisplay})`;
+    }
+</script>
+</html>
