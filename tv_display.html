@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AISAT Queue TV Display</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: white;
+            overflow: hidden;
+        }
+        
+        .main-layout {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .left-panel {
+            width: 75%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .right-panel {
+            width: 25%;
+            background-color: #0a1535;
+            border-left: 2px solid #001489;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-auto-rows: minmax(150px, auto);
+            gap: 15px;
+            padding: 15px;
+            height: 65vh;
+            overflow-y: auto;
+            background-color: white;
+        }
+        
+        .window {
+            border: 2px solid #001489;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .window-title {
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px;
+            background-color: #001489;
+            color: white;
+            text-align: center;
+            border-bottom: 2px solid black;
+        }
+        
+        .window-content {
+            flex: 1;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 10px;
+            overflow: hidden;
+        }
+        
+        .req-id {
+            font-size: 24px;
+            font-weight: bold;
+            color: #001489;
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .req-id.highlighted {
+            background-color: #001489;
+            color: white;
+            animation: blink 1.5s infinite;
+        }
+        
+        @keyframes blink {
+            0% { background-color: #001489; }
+            50% { background-color: #3f51b5; }
+            100% { background-color: #001489; }
+        }
+        
+        .status-bar {
+            background-color: #001489;
+            color: white;
+            padding: 10px;
+            font-size: 16px;
+            height: 10vh;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border-radius: 5px;
+            padding: 10px;
+            height: 80px;
+        }
+
+        .logo {
+            height: 60px;
+            margin-right: 10px;
+        }
+        
+        .college-text {
+            color: #001489;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .tagline {
+            color: #f39c12;
+            font-size: 18px;
+        }
+
+        .current-queue {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #001489;
+            padding: 10px;
+            flex: 1;
+            height: 100%;
+        }
+
+        .queue-title {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .queue-numbers {
+            font-size: 24px;
+            font-weight: bold;
+            white-space: pre-line;
+        }
+
+        .waiting-section {
+            background-color: white;
+            padding: 10px;
+            border-top: 2px solid black;
+            display: flex;
+            justify-content: space-around;
+            height: 25vh;
+        }
+
+        .waiting-category {
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid black;
+            position: relative;
+            padding: 0 5px;
+        }
+        
+        .waiting-category:last-child {
+            border-right: none;
+        }
+
+        .waiting-title {
+            font-weight: bold;
+            color: black;
+            padding: 5px;
+            font-size: 20px;
+            margin-bottom: 8px;
+            border-bottom: 2px solid #001489;
+        }
+
+        .waiting-numbers {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            padding: 0 5px;
+            overflow-y: auto;
+            flex: 1;
+            max-height: calc(100% - 65px);
+        }
+
+        .waiting-number {
+            font-weight: normal;
+            color: black;
+            padding: 3px 0;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .waiting-count-container {
+            border-top: 2px solid black;
+            padding-top: 5px;
+            width: 100%;
+            position: absolute;
+            bottom: 2px;
+            left: 0;
+            background-color: white;
+            z-index: 5;
+        }
+
+        .waiting-count {
+            font-size: 16px;
+            font-weight: bold;
+            color: black;
+        }
+        
+        .no-windows {
+            display: none;
+            grid-column: span 4;
+            text-align: center;
+            padding: 50px;
+            font-size: 24px;
+            color: #666;
+            font-weight: bold;
+        }
+        
+        .ads-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: #000;
+        }
+        
+        .ads-title {
+            display: none;
+        }
+        
+        .ads-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
+        
+        .ad-item {
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+        
+        .ad-item.active {
+            display: block;
+            width: 100%;
+            height: 100%;
+            animation: fadeIn 1s;
+            background-color: #000;
+        }
+        
+        .ad-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .ad-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .ad-title {
+            display: none;
+        }
+        
+        .ad-description {
+            display: none;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-layout">
+        <div class="left-panel">
+    <div class="container" id="windows-container">
+        <div class="no-windows" id="no-windows-message">
+            No active admins online
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <div class="logo-section">
+            <div>
+                <div class="college-text">AISAT<span style="font-size: 20px;">COLLEGE</span></div>
+                <div class="tagline">WE TEACH YOU EXCEL.</div>
+            </div>
+        </div>
+        
+        <div class="current-queue">
+            <div class="queue-title" style="margin-top: 20px;">STILL IN QUEUE - CASHIER WILL WAIT FOR 10 MINUTES ONLY</div>
+            <div class="queue-numbers" id="current-queue">
+            </div>
+        </div>
+    </div>
+
+    <div class="waiting-section">
+        <div class="waiting-category">
+            <div class="waiting-title">EXPRESS</div>
+            <div class="waiting-numbers" id="express-queue">
+            </div>
+                    <div class="waiting-count-container">
+            <div class="waiting-count">WAITING <span id="express-count">0</span></div>
+                    </div>
+        </div>
+
+        <div class="waiting-category">
+            <div class="waiting-title">PRIORITY</div>
+            <div class="waiting-numbers" id="priority-queue">
+            </div>
+                    <div class="waiting-count-container">
+            <div class="waiting-count">WAITING <span id="priority-count">0</span></div>
+                    </div>
+        </div>
+
+        <div class="waiting-category">
+                    <div class="waiting-title">REGULAR</div>
+            <div class="waiting-numbers" id="promissory-queue">
+            </div>
+                    <div class="waiting-count-container">
+            <div class="waiting-count">WAITING <span id="promissory-count">0</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="ads-panel">
+                <div class="ads-title">ANNOUNCEMENTS</div>
+                <div class="ads-content" id="ads-container">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = "https://jimboyaczon.pythonanywhere.com";
+        const REFRESH_INTERVAL = 5000;
+        const ADS_INTERVAL = 10000;
+        const MEDIA_CHECK_INTERVAL = 3000;
+        
+        let activeAdmins = [];
+        let pendingRequests = [];
+        let currentCalls = [];
+        let currentQueue = {
+            regular: [],
+            express: [],
+            priority: [],
+            promissory: [],
+            merchant: []
+        };
+        
+        const ads = [
+            {
+                id: 1,
+                title: "Summer Enrollment 2023",
+                description: "Enroll now for summer classes and get a 10% discount!",
+                image: "https://aisat.edu.ph/wp-content/uploads/2019/03/only-seal.png"
+            },
+            {
+                id: 2,
+                title: "Career Fair 2023",
+                description: "Join us on May 15 for our annual career fair with top employers",
+                image: "https://aisat.edu.ph/wp-content/uploads/2019/03/only-seal.png"
+            },
+            {
+                id: 3,
+                title: "Scholarship Applications Open",
+                description: "Apply now for academic scholarships for the next semester",
+                image: "https://aisat.edu.ph/wp-content/uploads/2019/03/only-seal.png"
+            }
+        ];
+        
+        let currentAdIndex = 0;
+        let currentActiveMedia = null;
+        let lastMediaCheckTime = 0;
+        
+        async function fetchPendingRequests() {
+            try {
+                console.log("Fetching pending requests from:", `${API_BASE_URL}/api/requests/pending`);
+                const response = await fetch(`${API_BASE_URL}/api/requests/pending`);
+                if (!response.ok) throw new Error('Failed to fetch pending requests');
+                
+                const data = await response.json();
+                console.log("Received pending requests:", data.length);
+                pendingRequests = data;
+                return data;
+            } catch (error) {
+                console.error('Error fetching pending requests:', error);
+                return [];
+            }
+        }
+        
+        async function fetchActiveAdmins() {
+            try {
+                console.log("Fetching active admins");
+                const response = await fetch(`${API_BASE_URL}/api/admins/active`);
+                if (!response.ok) {
+                    console.warn('Failed to fetch active admins');
+                    activeAdmins = [];
+                    return [];
+                }
+                
+                const data = await response.json();
+                console.log("Received active admins with rooms:", data.length);
+                
+                activeAdmins = data.filter(admin => admin.id && admin.room_name);
+                
+                if (activeAdmins.length === 0) {
+                    const container = document.getElementById('windows-container');
+                    Array.from(container.children).forEach(child => {
+                        if (!child.id || child.id !== 'no-windows-message') {
+                            container.removeChild(child);
+                        }
+                    });
+                    document.getElementById('no-windows-message').style.display = 'block';
+                }
+                
+                return activeAdmins;
+            } catch (error) {
+                console.warn('Error fetching admins:', error);
+                activeAdmins = [];
+                return [];
+            }
+        }
+        
+        async function fetchCurrentCalls() {
+            try {
+                console.log("Fetching current calls");
+                const response = await fetch(`${API_BASE_URL}/api/display/current-calls`);
+                if (!response.ok) {
+                    console.warn('Failed to fetch current calls');
+                    return [];
+                }
+                
+                const data = await response.json();
+                console.log("Received current calls:", data.length);
+                currentCalls = data;
+                return data;
+            } catch (error) {
+                console.warn('Error fetching current calls:', error);
+                return [];
+            }
+        }
+        
+        function createAdminWindows() {
+            const container = document.getElementById('windows-container');
+            
+            Array.from(container.children).forEach(child => {
+                if (!child.id || child.id !== 'no-windows-message') {
+                    container.removeChild(child);
+                }
+            });
+            
+            if (!activeAdmins || activeAdmins.length === 0) {
+                document.getElementById('no-windows-message').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('no-windows-message').style.display = 'none';
+            
+            activeAdmins.forEach(admin => {
+                if (admin.room_name && admin.id) {
+                    console.log(`Creating window for admin: ${admin.full_name}, Room: ${admin.room_name}`);
+                    
+                    const windowElement = document.createElement('div');
+                    windowElement.className = 'window';
+                    windowElement.id = `window-${admin.id}`;
+                    
+                    const windowTitle = document.createElement('div');
+                    windowTitle.className = 'window-title';
+                    windowTitle.textContent = admin.room_name;
+                    
+                    const windowContent = document.createElement('div');
+                    windowContent.className = 'window-content';
+                    windowContent.id = `window-content-${admin.id}`;
+                    
+                    windowElement.appendChild(windowTitle);
+                    windowElement.appendChild(windowContent);
+                    container.appendChild(windowElement);
+                }
+            });
+        }
+        
+        function assignRequestsToWindows() {
+            document.querySelectorAll('.window-content').forEach(content => {
+                content.innerHTML = '';
+            });
+            
+            currentQueue = {
+                regular: [],
+                express: [],
+                priority: [],
+                promissory: [],
+                merchant: []
+            };
+            
+            const currentQueueItems = [];
+            
+            const calledRequestIds = {};
+            currentCalls.forEach(call => {
+                calledRequestIds[call.request_id_display] = call;
+            });
+            
+            pendingRequests.forEach(request => {
+                const requestId = request.request_id || `RE-${String(request.id).padStart(4, '0')}`;
+                
+                const payment = (request.payment || 'regular').toLowerCase();
+                
+                switch (payment) {
+                    case 'priority':
+                        currentQueue.priority.push(requestId);
+                        break;
+                    case 'express':
+                        currentQueue.express.push(requestId);
+                        break;
+                    case 'promissory':
+                        currentQueue.promissory.push(requestId);
+                        break;
+                    case 'merchant':
+                        currentQueue.merchant.push(requestId);
+                        break;
+                    default:
+                        currentQueue.regular.push(requestId);
+                        break;
+                }
+                
+                let assigned = false;
+                for (const admin of activeAdmins) {
+                    const filterPreference = admin.filter_preference || 'all';
+                    
+                    const acceptsPayment = filterPreference === 'all' || 
+                                         (admin.accepted_payments && 
+                                          admin.accepted_payments.includes(payment));
+                    
+                    if (acceptsPayment) {
+                        const windowContent = document.getElementById(`window-content-${admin.id}`);
+                        if (windowContent) {
+                            if (windowContent.children.length < 3) {
+                                const reqElement = document.createElement('div');
+                                reqElement.className = 'req-id';
+                                reqElement.textContent = requestId;
+                                
+                                const isBeingCalled = calledRequestIds[requestId];
+                                if (isBeingCalled) {
+                                    reqElement.classList.add('highlighted');
+                                    
+                                    currentQueueItems.push(`${requestId} - ${admin.room_name}`);
+                                }
+                                
+                                windowContent.appendChild(reqElement);
+                                assigned = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                if (!assigned && calledRequestIds[requestId]) {
+                    currentQueueItems.push(requestId);
+                }
+            });
+            
+            document.getElementById('current-queue').innerHTML = currentQueueItems.join('\n');
+            
+            updateQueueDisplay('regular', currentQueue.regular);
+            updateQueueDisplay('express', currentQueue.express);
+            updateQueueDisplay('priority', currentQueue.priority);
+            updateQueueDisplay('promissory', currentQueue.promissory);
+            updateQueueDisplay('merchant', currentQueue.merchant);
+            
+            document.getElementById('express-count').textContent = currentQueue.express.length;
+            document.getElementById('priority-count').textContent = currentQueue.priority.length;
+            document.getElementById('promissory-count').textContent = currentQueue.promissory.length || 0;
+        }
+        
+        function updateQueueDisplay(queueType, queueItems) {
+            const queueEl = document.getElementById(`${queueType}-queue`);
+            const countEl = document.getElementById(`${queueType}-count`);
+            
+            if (!queueEl || !countEl) return;
+            
+            queueEl.innerHTML = '';
+            
+            countEl.textContent = queueItems.length;
+            
+            const displayItems = queueItems.slice(0, 24);
+            displayItems.forEach(item => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'waiting-number';
+                itemEl.textContent = item;
+                queueEl.appendChild(itemEl);
+            });
+        }
+        
+        function showAd(index) {
+            const adsContainer = document.getElementById('ads-container');
+            adsContainer.innerHTML = '';
+            
+            if (!ads || ads.length === 0) {
+                const noAdsElement = document.createElement('div');
+                noAdsElement.className = 'ad-item active';
+                adsContainer.appendChild(noAdsElement);
+                return;
+            }
+            
+            const ad = ads[index];
+            const adElement = document.createElement('div');
+            adElement.className = 'ad-item active';
+            
+            const adImage = document.createElement('img');
+            adImage.className = 'ad-image';
+            adImage.src = ad.image;
+            adImage.alt = ad.title;
+            
+            adElement.appendChild(adImage);
+            
+            adsContainer.appendChild(adElement);
+        }
+        
+        function rotateAds() {
+            if (ads.length === 0) return;
+            
+            showAd(currentAdIndex);
+            currentAdIndex = (currentAdIndex + 1) % ads.length;
+        }
+        
+        async function checkForActiveMedia() {
+            try {
+                const now = Date.now();
+                if (now - lastMediaCheckTime < MEDIA_CHECK_INTERVAL) {
+                    return;
+                }
+                
+                lastMediaCheckTime = now;
+                
+                const adsDir = './ads';
+                const activeMediaPath = `${adsDir}/active_media.json`;
+                
+                console.log("Checking for active media at:", activeMediaPath);
+                
+                try {
+                    const response = await fetch(activeMediaPath + '?t=' + now);
+                    
+                    if (response.ok) {
+                        console.log("Found active_media.json file!");
+                        const mediaData = await response.json();
+                        
+                        if (!currentActiveMedia || 
+                            currentActiveMedia.timestamp !== mediaData.timestamp || 
+                            currentActiveMedia.file_name !== mediaData.file_name) {
+                            
+                            console.log('New active media found:', mediaData);
+                            currentActiveMedia = mediaData;
+                            
+                            displayActiveMedia();
+                        }
+                        return;
+                    } else {
+                        console.log("Active media file not found at:", activeMediaPath, "Status:", response.status);
+                    }
+                } catch (e) {
+                    console.log("Error accessing first path:", e.message);
+                }
+                
+                const absolutePath = `/ads/active_media.json`;
+                console.log("Trying absolute path:", absolutePath);
+                
+                try {
+                    const absoluteResponse = await fetch(absolutePath + '?t=' + now);
+                    
+                    if (absoluteResponse.ok) {
+                        console.log("Found active_media.json file at absolute path!");
+                        const mediaData = await absoluteResponse.json();
+                        
+                        if (!currentActiveMedia || 
+                            currentActiveMedia.timestamp !== mediaData.timestamp || 
+                            currentActiveMedia.file_name !== mediaData.file_name) {
+                            
+                            console.log('New active media found:', mediaData);
+                            currentActiveMedia = mediaData;
+                            
+                            displayActiveMedia();
+                        }
+                    } else {
+                        console.log("Active media file not found at absolute path. Status:", absoluteResponse.status);
+                    }
+                } catch (e) {
+                    console.log("Error accessing absolute path:", e.message);
+                }
+                
+            } catch (error) {
+                console.warn('Error checking for active media:', error);
+            }
+        }
+        
+        function displayActiveMedia() {
+            const adsContainer = document.getElementById('ads-container');
+            adsContainer.innerHTML = '';
+            
+            if (!currentActiveMedia) {
+                rotateAds();
+                return;
+            }
+            
+            console.log("Displaying active media:", currentActiveMedia);
+            
+            const mediaElement = document.createElement('div');
+            mediaElement.className = 'ad-item active';
+            
+            const fileType = currentActiveMedia.file_type;
+            
+            let filePath = `./ads/${currentActiveMedia.file_name}`;
+            
+            console.log("Trying to load media from:", filePath);
+            
+            if (fileType === 'Image') {
+                const imgElement = document.createElement('img');
+                imgElement.className = 'ad-image';
+                imgElement.src = filePath;
+                imgElement.alt = currentActiveMedia.title;
+                imgElement.onerror = function() {
+                    console.log("Failed to load image from path:", filePath);
+                    imgElement.src = `/ads/${currentActiveMedia.file_name}`;
+                    console.log("Trying alternate path:", imgElement.src);
+                };
+                mediaElement.appendChild(imgElement);
+            } else if (fileType === 'GIF') {
+                const imgElement = document.createElement('img');
+                imgElement.className = 'ad-image';
+                imgElement.src = filePath;
+                imgElement.alt = currentActiveMedia.title;
+                imgElement.onerror = function() {
+                    console.log("Failed to load GIF from path:", filePath);
+                    imgElement.src = `/ads/${currentActiveMedia.file_name}`;
+                    console.log("Trying alternate path:", imgElement.src);
+                };
+                mediaElement.appendChild(imgElement);
+            } else if (fileType === 'Video') {
+                const videoElement = document.createElement('video');
+                videoElement.className = 'ad-video';
+                videoElement.src = filePath;
+                videoElement.controls = false;
+                videoElement.autoplay = true;
+                videoElement.loop = true;
+                videoElement.muted = true;
+                videoElement.onerror = function() {
+                    console.log("Failed to load video from path:", filePath);
+                    videoElement.src = `/ads/${currentActiveMedia.file_name}`;
+                    console.log("Trying alternate path:", videoElement.src);
+                };
+                mediaElement.appendChild(videoElement);
+            } else {
+                const placeholderElement = document.createElement('div');
+                placeholderElement.className = 'ad-placeholder';
+                placeholderElement.textContent = 'Unsupported media type';
+                mediaElement.appendChild(placeholderElement);
+            }
+            
+            adsContainer.appendChild(mediaElement);
+        }
+        
+        async function init() {
+            console.log("Initializing TV display...");
+            
+            await fetchActiveAdmins();
+            await fetchPendingRequests();
+            await fetchCurrentCalls();
+            
+            createAdminWindows();
+            
+            assignRequestsToWindows();
+            
+            await checkForActiveMedia();
+            
+            console.log(`Starting polling interval (${REFRESH_INTERVAL}ms)...`);
+            setInterval(async () => {
+                await fetchActiveAdmins();
+                await fetchPendingRequests();
+                await fetchCurrentCalls();
+                
+                createAdminWindows();
+                
+                assignRequestsToWindows();
+            }, REFRESH_INTERVAL);
+            
+            setInterval(() => {
+                if (!currentActiveMedia) {
+                    rotateAds();
+                }
+            }, ADS_INTERVAL);
+            
+            setInterval(checkForActiveMedia, MEDIA_CHECK_INTERVAL);
+        }
+        
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
