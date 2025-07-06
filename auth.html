@@ -25,7 +25,7 @@
         script-src 'self' 'unsafe-inline' 'unsafe-eval';
         style-src 'self' 'unsafe-inline';
         img-src 'self' data: content:;
-        connect-src * 'self' https://jimboyaczon.pythonanywhere.com http://jimboyaczon.pythonanywhere.com;
+        connect-src 'self' http://*:5057 https://jimboyaczon.pythonanywhere.com;
         font-src 'self';
         object-src 'none';
         media-src *;
@@ -41,7 +41,7 @@
         
         <title>Aisat Login</title>
     </head>
-    <body>
+    <body>  
         <!-- psword Reset Container -->
         <div id="reset-container">
             <div id="reset-content">

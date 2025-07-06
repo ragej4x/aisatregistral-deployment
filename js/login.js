@@ -88,19 +88,14 @@ function checkSession() {
         return; // No token found, user needs to log in
     }
     
-    // Debug - log the URL we're calling
-    const verifyUrl = `${baseUrl}/api/auth/verify`;
-    console.log('Verifying token at:', verifyUrl);
-    
     // Verify token with server
-    fetch(verifyUrl, {
+    fetch(`${baseUrl}/api/auth/verify`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`
         }
     })
     .then(response => {
-        console.log('Verify response status:', response.status);
         if (!response.ok) {
             throw new Error('Session expired');
         }
@@ -113,7 +108,6 @@ function checkSession() {
     })
     .catch(error => {
         // Token is invalid or expired, clear it
-        console.error('Verify token error:', error);
         localStorage.removeItem('userToken');
         showLoading(false);
         showMessage('Session expired. Please login again.', true);
@@ -138,13 +132,11 @@ function handleLogin(event) {
         return;
     }
     
-    // Debug - log the request details
-    const loginUrl = `${baseUrl}/api/auth/user_login`;
-    console.log('Sending login request to:', loginUrl);
-    console.log('With ID:', idno);
+    // Log the request for debugging
+    console.log('Sending login request with ID:', idno);
     
     // Send login request to server
-    fetch(loginUrl, {
+    fetch(`${baseUrl}/api/auth/user_login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -153,14 +145,6 @@ function handleLogin(event) {
     })
     .then(response => {
         console.log('Login response status:', response.status);
-        
-        // Debug - log response headers
-        const headers = {};
-        response.headers.forEach((value, name) => {
-            headers[name] = value;
-        });
-        console.log('Response headers:', headers);
-        
         if (!response.ok) {
             return response.json()
                 .then(data => {
@@ -169,12 +153,7 @@ function handleLogin(event) {
                 })
                 .catch(err => {
                     if (err.name === 'SyntaxError') {
-                        // If the response is not valid JSON, log the raw response
-                        console.error('Response is not valid JSON');
-                        return response.text().then(text => {
-                            console.log('Raw response:', text);
-                            throw new Error('Invalid response format from server');
-                        });
+                        throw new Error('Invalid response format from server');
                     }
                     throw err;
                 });
@@ -207,8 +186,7 @@ function handleLogin(event) {
     .catch(error => {
         showLoading(false);
         console.error('Login error:', error);
-        // Show a more detailed error message
-        showMessage(`Login failed: ${error.message || 'Invalid ID number or password. Please try again.'}`, true);
+        showMessage(error.message || 'Invalid ID number or password. Please try again.', true);
     });
 }
 
@@ -235,9 +213,6 @@ function showMessage(message, isError) {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, initializing login.js');
-    console.log('Base URL is:', baseUrl);
-    
     // Wait a short time to ensure auth.js has run its initialization
     setTimeout(() => {
         createUIElements();
@@ -246,9 +221,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Handle form submission
         if (loginForm) {
             loginForm.addEventListener('submit', handleLogin);
-            console.log('Login form handler attached');
-        } else {
-            console.error('Login form not found on DOMContentLoaded');
         }
     }, 100);
 }); 

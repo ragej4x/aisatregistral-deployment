@@ -100,24 +100,21 @@ class AppointmentCalendar {
         );
         this.currentMonthYearDisplay.textContent = `${monthNames[this.currentMonth]} ${this.currentYear}`;
         
-        // Calculate first day of month and days in month
         const firstDay = new Date(this.currentYear, this.currentMonth, 1).getDay();
         const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
         
-        // Add empty cells for days before the first day of the month
         for (let i = 0; i < firstDay; i++) {
             const emptyCell = document.createElement('div');
             this.calendarGrid.appendChild(emptyCell);
         }
         
-        // Fetch calendar data from server
         fetch(`${this.options.baseUrl}/api/calendar`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`Server returned status ${response.status}`);
                 }
                 return response.json();
-            })
+            })  
             .then(data => {
                 this.loadingMessage.style.display = 'none';
                 
@@ -151,8 +148,7 @@ class AppointmentCalendar {
                 this.loadingMessage.style.display = 'none';
                 this.showMessage(`Failed to load calendar data. Please try again later.`, true);
                 
-                // Show empty calendar if data fetch fails
-                for (let i = 1; i <= daysInMonth; i++) {
+                    for (let i = 1; i <= daysInMonth; i++) {
                     const date = new Date(this.currentYear, this.currentMonth, i);
                     const year = date.getFullYear();
                     const month = String(date.getMonth() + 1).padStart(2, '0');

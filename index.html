@@ -15,6 +15,8 @@
     <script src="js/settings.js" defer></script>
     <script src="js/receipt.js" defer></script>
     <script src="js/tutorial.js" defer></script>
+    <!-- Load announcement.js without defer to ensure it's loaded immediately -->
+    <script src="js/announcement.js"></script>
     <style>
         :root {
             --primary-color: #6b9ac4;
@@ -1426,19 +1428,24 @@
         
         .announcement-item {
             padding: 15px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             background-color: rgba(0, 51, 102, 0.05);
             border-radius: 8px;
             border-left: 3px solid var(--primary-color);
+            overflow: hidden;
         }
         
         .announcement-item h4 {
-            margin: 0 0 5px 0;
+            margin: 0 0 10px 0;
             color: var(--primary-color);
+            font-size: 18px;
+            font-weight: 600;
         }
         
         .announcement-item p {
-            margin: 0 0 8px 0;
+            margin: 0 0 12px 0;
+            line-height: 1.5;
+            color: var(--text-dark);
         }
         
         .announcement-item .date {
@@ -1446,14 +1453,100 @@
             color: var(--text-muted);
             display: block;
             text-align: right;
+            margin-top: 5px;
         }
         
+        .announcement-image-container {
+            margin: 10px 0;
+            border-radius: 6px;
+            overflow: hidden;
+            max-height: 200px;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+        
+        .announcement-image-container img {
+            max-width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+        }
+        
+        .facebook-embed {
+            margin: 10px 0;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .facebook-embed iframe {
+            width: 100% !important;
+            border: none !important;
+        }
+
+        /* Enhanced announcement styles */
+        .announcement-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: rgba(0, 51, 102, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary-color);
+            overflow: hidden;
+        }
+
+        .announcement-item h4 {
+            margin: 0 0 10px 0;
+            color: var(--primary-color);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .announcement-item p {
+            margin: 0 0 12px 0;
+            line-height: 1.5;
+            color: var(--text-dark);
+        }
+
+        .announcement-item .date {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: block;
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .announcement-image-container {
+            margin: 10px 0;
+            border-radius: 6px;
+            overflow: hidden;
+            max-height: 200px;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+
+        .announcement-image-container img {
+            max-width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+        }
+
+        .facebook-embed {
+            margin: 10px 0;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .facebook-embed iframe {
+            width: 100% !important;
+            border: none !important;
+        }
+
         .quick-links {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
         }
-        
+
         .quick-link-item {
             display: flex;
             flex-direction: column;
@@ -1465,30 +1558,30 @@
             color: var(--text-dark);
             transition: all 0.3s ease;
         }
-        
+
         .quick-link-item:hover {
             background-color: rgba(80, 198, 216, 0.2);
             transform: translateY(-2px);
         }
-        
+
         .quick-link-item i {
             font-size: 24px;
             color: var(--wave-color);
             margin-bottom: 8px;
         }
-        
+
         .contact-info {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
-        
+
         .contact-item {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        
+
         .contact-item i {
             width: 30px;
             height: 30px;
@@ -1509,14 +1602,14 @@
         .notification-item .status.waiting {
             color: var(--text-muted);
         }
-        
+
         /* Tutorial Modal Styles */
         #tutorial-modal .modal-content {
             padding: 20px;
             max-width: 95%;
             width: 500px;
         }
-        
+
         @media (max-width: 480px) {
             #tutorial-modal .modal-content {
                 padding: 15px;
@@ -1524,35 +1617,35 @@
                 max-width: 95%;
             }
         }
-        
+
         .video-container {
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-        
+
         #tutorial-video {
             background-color: #000;
             object-fit: contain;
         }
-        
+
         #tutorial-video::-webkit-media-controls-panel {
             background-color: rgba(0,0,0,0.7);
         }
-        
+
         #tutorial-video::-webkit-media-controls-play-button {
             background-color: var(--primary-color);
             border-radius: 50%;
             color: white;
         }
-        
+
         #tutorial-done-btn {
             margin-top: 15px;
             width: 100%;
             padding: 12px;
             font-weight: 600;
         }
-        
+
         /* Play button overlay */
         .play-instructions {
             position: absolute;
@@ -1563,36 +1656,39 @@
             z-index: 5;
             cursor: pointer;
         }
-        
+
         .play-instructions i {
             animation: pulse 1.5s infinite;
         }
-        
+
         @keyframes pulse {
             0% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.1); opacity: 0.8; }
             100% { transform: scale(1); opacity: 1; }
         }
-        
+
         /* Improve modal animation for mobile */
         .modal-content {
             transform: translateY(20px) scale(0.95);
             transition: transform 0.3s ease, opacity 0.3s ease;
         }
-        
+
         .modal.visible .modal-content {
             transform: translateY(0) scale(1);
         }
-        
+
         .wave-expanded .header-bg {
             height: 100vh;
         }
     </style>
 </head>
 <body>
+
+    <div style="max-height: 100px;" id="announcements-container">  <div id="fb-root"></div>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v23.0"></script>
     <!-- Simple Header Background -->
     <div class="header-bg"></div>
-
+    
     <!-- Profile Form inside Wave -->
     <div class="wave-profile-container" id="wave-profile">
         <div class="wave-profile-form">
@@ -1799,8 +1895,12 @@
                     <i class="fas fa-arrow-left"></i> Back
                 </button>
             </div>
-        </div>
+        </div>  
+        <br>
+                   
+     
     </div>
+    
     
     <!-- Spacer to maintain layout -->
     <div class="content-spacer"></div>
@@ -1809,51 +1909,42 @@
     <div class="scroll-reveal-container">
         <div class="scroll-reveal-section fade-section">
             <h3>Announcements</h3>
-                <p>Stay updated with the latest information from AISAT.</p>
-                <div class="announcement-item">
-                    <h4>Enrollment Period Extended</h4>
-                    <p>The enrollment period for the next semester has been extended until August 15th.</p>
-                    <span class="date">July 28, 2023</span>
-                </div>
-                <div class="announcement-item">
-                    <h4>System Maintenance</h4>
-                    <p>The student portal will be under maintenance on August 5th from 10PM to 2AM.</p>
-                    <span class="date">July 25, 2023</span>
-                </div>
+            <div class="fb-page" data-href="https://www.facebook.com/thephoenixadvisory" data-tabs="timeline" data-width="" data-height="" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true"><blockquote cite="https://www.facebook.com/thephoenixadvisory" class="fb-xfbml-parse-ignore"><a href="https://www.facebook.com/thephoenixadvisory">The Phoenix Advisory</a></blockquote></div>
+
         </div>
+        
         
         <div class="scroll-reveal-section fade-section">
             <h3>Quick Links</h3>
-                <div class="quick-links">
+            <div class="quick-links">
+                <a href="https://www.facebook.com/aisatcollegedasmaph" class="quick-link-item">
+                    <i class="fas fa-book"></i>
+                    <span>Our page</span>
+                </a>
 
-                    <a href="#" class="quick-link-item">
-                        <i class="fas fa-book"></i>
-                        <span>Our page</span>
-                    </a>
-
-                    <a href="#" class="quick-link-item">
-                        <i class="fas fa-question-circle"></i>
-                        <span>About Us</span>
-                    </a>
-                </div>
+                <a href="about.html" class="quick-link-item">
+                    <i class="fas fa-question-circle"></i>
+                    <span>About Us</span>
+                </a>
+            </div>
         </div>
         
         <div class="scroll-reveal-section fade-section">
             <h3>Contact Information</h3>
-                <div class="contact-info">
-                    <div class="contact-item">
-                        <i class="fas fa-phone"></i>
-                        <span>+63 (969) 699-6969</span>
-                    </div>
-                    <div class="contact-item">
-                        <i class="fas fa-envelope"></i>
-                        <span>info@aisat.edu.ph</span>
-                    </div>
-                    <div class="contact-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>123 AISAT Campus, Dasmariñas City, Cavite, Philippines</span>
-                    </div>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <span>+63 (969) 699-6969</span>
                 </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>info@aisat.edu.ph</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>123 AISAT Campus, Dasmariñas City, Cavite, Philippines</span>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -1942,6 +2033,8 @@
             </button>
         </div>
     </div>
+
+    <script src="js/tutorial.js"></script>
 
     <script>
         // baseUrl is defined in the head section
@@ -2453,6 +2546,104 @@
                     return Promise.resolve(false);
                 }
                 
+                // First check if we already have the request in localStorage (from notification system)
+                const storedRequest = localStorage.getItem('userCurrentRequest');
+                if (storedRequest) {
+                    try {
+                        const parsedRequest = JSON.parse(storedRequest);
+                        console.log('Using stored request from localStorage:', parsedRequest);
+                        return Promise.resolve(parsedRequest);
+                    } catch (e) {
+                        console.error('Error parsing stored request:', e);
+                        // Continue with API call if parsing fails
+                    }
+                }
+                
+                // Use the new combined endpoint for notifications and own requests
+                return fetch(`${baseUrl}/api/user/notifications`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Server responded with ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // The new endpoint returns has_own_request flag and own_request object
+                    if (data.has_own_request === true && data.own_request) {
+                        // User has an existing request - return the request data
+                        console.log('Found existing request:', data.own_request);
+                        
+                        // Store for future use
+                        localStorage.setItem('userCurrentRequest', JSON.stringify(data.own_request));
+                        
+                        return data.own_request;
+                    }
+                    
+                    // No existing requests
+                    console.log('No existing requests found');
+                    localStorage.removeItem('userCurrentRequest');
+                    return false;
+                })
+                .catch(error => {
+                    console.error('Error checking existing requests:', error);
+                    // Fallback to the dedicated endpoint if the combined one fails
+                    return fetchExistingRequestsFromDedicatedEndpoint();
+                });
+            }
+            
+            // Fallback to the dedicated endpoint for checking own requests
+            function fetchExistingRequestsFromDedicatedEndpoint() {
+                console.log('Using dedicated endpoint to check for existing requests');
+                const token = localStorage.getItem('userToken');
+                if (!token) {
+                    return Promise.resolve(false);
+                }
+                
+                return fetch(`${baseUrl}/api/user/check_own_request`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Server responded with ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // The dedicated endpoint returns a single object with has_request flag
+                    if (data.has_request === true) {
+                        console.log('Found existing request using dedicated endpoint:', data);
+                        
+                        // Store for future use
+                        localStorage.setItem('userCurrentRequest', JSON.stringify(data));
+                        
+                        return data;
+                    }
+                    
+                    console.log('No existing requests found using dedicated endpoint');
+                    localStorage.removeItem('userCurrentRequest');
+                    return false;
+                })
+                .catch(error => {
+                    console.error('Error in dedicated endpoint check:', error);
+                    // Final fallback to the legacy method
+                    return fetchExistingRequestsLegacy();
+                });
+            }
+            
+            // Legacy fallback method for checking existing requests
+            function fetchExistingRequestsLegacy() {
+                console.log('Using legacy method to check for existing requests');
+                const token = localStorage.getItem('userToken');
+                if (!token) {
+                    return Promise.resolve(false);
+                }
+                
                 return fetch(`${baseUrl}/api/user/requests`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -2467,20 +2658,22 @@
                 .then(data => {
                     // Find the user's own requests (pending or oncall)
                     const userRequests = data.filter(req => 
-                        req.is_current_user === true && 
+                        (req.is_current_user === true || req.idno === JSON.parse(localStorage.getItem('userData') || '{}').idno) && 
                         (req.status === 'pending' || req.status === 'oncall')
                     );
                     
                     if (userRequests.length > 0) {
                         // User has an existing request - return the most recent one
+                        console.log('Found existing request using legacy method:', userRequests[0]);
                         return userRequests[0];
                     }
                     
                     // No existing requests
+                    console.log('No existing requests found using legacy method');
                     return false;
                 })
                 .catch(error => {
-                    console.error('Error checking existing requests:', error);
+                    console.error('Error in legacy check for existing requests:', error);
                     return false;
                 });
             }
@@ -3000,81 +3193,74 @@
                 return;
             }
             
+            // First check if we already have the request in localStorage
+            const storedRequest = localStorage.getItem('userCurrentRequest');
+            if (storedRequest) {
+                try {
+                    const parsedRequest = JSON.parse(storedRequest);
+                    console.log('Using stored request from localStorage for banner:', parsedRequest);
+                    showRequestBanner(parsedRequest);
+                    return; // Exit early since we found a request
+                } catch (e) {
+                    console.error('Error parsing stored request for banner:', e);
+                    // Continue with API call if parsing fails
+                }
+            }
+            
+            // Use the combined endpoint for checking requests
+            fetch(`${baseUrl}/api/user/notifications`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Server responded with ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Check if user has a request
+                if (data.has_own_request === true && data.own_request) {
+                    // Store for future use
+                    localStorage.setItem('userCurrentRequest', JSON.stringify(data.own_request));
+                    
+                    showRequestBanner(data.own_request);
+                } else {
+                    console.log('No existing requests found on page load');
+                    localStorage.removeItem('userCurrentRequest');
+                }
+            })
+            .catch(error => {
+                console.error('Error checking existing requests on load:', error);
+                // Fall back to the dedicated endpoint
+                fetch(`${baseUrl}/api/user/check_own_request`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.has_request === true) {
+                        showRequestBanner(data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error in fallback check:', error);
+                    // Final fallback to the original method
             checkExistingRequests().then(existingRequest => {
                 if (existingRequest) {
-                    // Create a notification banner
-                    const banner = document.createElement('div');
-                    banner.className = 'existing-request-banner';
-                    banner.innerHTML = `
-                        <i class="fas fa-info-circle"></i>
-                        You have an existing ${existingRequest.status === 'oncall' ? 'on-call' : 'pending'} request.
-                        <button id="view-request-btn">View Details</button>
-                    `;
-                    banner.style.cssText = `
-                        position: fixed;
-                        top: 70px;
-                        left: 0;
-                        right: 0;
-                        margin: 0 auto;
-                        width: 90%;
-                        max-width: 400px;
-                        background-color: #e6f2ff;
-                        color: #0066cc;
-                        border: 1px solid #99ccff;
-                        border-radius: 8px;
-                        padding: 12px;
-                        text-align: center;
-                        z-index: 100;
-                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                        animation: slideDown 0.3s ease-out;
-                    `;
-                    
-                    // Add animation style
-                    const style = document.createElement('style');
-                    style.textContent = `
-                        @keyframes slideDown {
-                            from { transform: translateY(-20px); opacity: 0; }
-                            to { transform: translateY(0); opacity: 1; }
+                            showRequestBanner(existingRequest);
                         }
-                        .existing-request-banner button {
-                            background-color: #0066cc;
-                            color: white;
-                            border: none;
-                            border-radius: 4px;
-                            padding: 5px 10px;
-                            margin-left: 10px;
-                            cursor: pointer;
-                            font-weight: bold;
-                        }
-                        .existing-request-banner button:hover {
-                            background-color: #004c99;
-                        }
-                    `;
-                    document.head.appendChild(style);
-                    
-                    // Add to document
-                    document.body.appendChild(banner);
-                    
-                    // Add event listener to view button
-                    document.getElementById('view-request-btn').addEventListener('click', function() {
-                        showExistingRequestReceipt(existingRequest, false);
-                        // Remove the banner
-                        banner.style.display = 'none';
                     });
-                    
-                    // Auto-hide after 8 seconds
-                    setTimeout(() => {
-                        banner.style.opacity = '0';
-                        banner.style.transform = 'translateY(-20px)';
-                        banner.style.transition = 'all 0.3s ease';
-                        setTimeout(() => {
-                            if (banner.parentNode) {
-                                banner.parentNode.removeChild(banner);
-                            }
-                        }, 300);
-                    }, 8000);
-                }
+                });
             });
+        }
+        
+        // Helper function to show the request banner
+        function showRequestBanner(existingRequest) {
+                    // Banner removed as requested
+                    console.log('Request banner display disabled');
         }
 
         // Call this function when the page loads
@@ -3098,6 +3284,17 @@
         
         // Now call checkExistingRequestsOnLoad after all functions are defined
         setTimeout(checkExistingRequestsOnLoad, 2000);
+    </script>
+    
+    <!-- Ensure announcement system is initialized -->
+    <script>
+        // Make sure AnnouncementController is initialized
+        if (typeof AnnouncementController !== 'undefined') {
+            console.log('Manually initializing AnnouncementController');
+            AnnouncementController.init();
+        } else {
+            console.error('AnnouncementController not found! Check if announcement.js is loaded correctly.');
+        }
     </script>
 </body>
 </html>

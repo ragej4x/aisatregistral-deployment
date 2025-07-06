@@ -47,9 +47,11 @@ function toggleRegister() {
 
 function hideRegister() {
   const form = document.getElementById("reg-container");
-  form.classList.remove("show");
-  form.classList.add("hide");
-  form.classList.remove("popupactive")
+  if (form) {
+    form.classList.remove("show");
+    form.classList.add("hide");
+    form.classList.remove("popupactive");
+  }
 }
 
 function togglePopup() {
