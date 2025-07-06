@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Use baseUrl defined in index.html or auth.html
-    // No need to redefine it here
+    if (!window.baseUrl) {
+        window.baseUrl = "https://jimboyaczon.pythonanywhere.com";
+    }
     
     const emailContainer = document.getElementById('email-container');
     const codeContainer = document.getElementById('code-container');
@@ -107,32 +109,32 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error:', error);
             alert('Error sending verification code. Please try again.');
         });
-
-        function processVerificationCode(code) {
-            verificationCode = code;
-            
-            emailContainer.style.display = 'none';
-            
-            codeContainer.classList.remove('hide-code'); 
-            codeContainer.style.display = 'flex';
-            codeContainer.style.opacity = '1';
-            codeContainer.style.visibility = 'visible';
-            codeContainer.style.pointerEvents = 'auto';
-            codeContainer.style.transform = 'scale(1)';
-            codeContainer.classList.add('show');
-            
-            void codeContainer.offsetWidth;
-            
-            document.querySelectorAll('.code-input').forEach(input => {
-                input.value = '';
-            });
-            document.getElementById('digit1').focus();
-            
-            setupDigitInputs();
-            
-            alert('Verification code has been sent to your email. Please check your inbox.');
-        }
     });
+
+    function processVerificationCode(code) {
+        verificationCode = code;
+        
+        emailContainer.style.display = 'none';
+        
+        codeContainer.classList.remove('hide-code'); 
+        codeContainer.style.display = 'flex';
+        codeContainer.style.opacity = '1';
+        codeContainer.style.visibility = 'visible';
+        codeContainer.style.pointerEvents = 'auto';
+        codeContainer.style.transform = 'scale(1)';
+        codeContainer.classList.add('show');
+        
+        void codeContainer.offsetWidth;
+        
+        document.querySelectorAll('.code-input').forEach(input => {
+            input.value = '';
+        });
+        document.getElementById('digit1').focus();
+        
+        setupDigitInputs();
+        
+        alert('Verification code has been sent to your email. Please check your inbox.');
+    }
 
     function setupDigitInputs() {
         const digitInputs = document.querySelectorAll('.code-input');

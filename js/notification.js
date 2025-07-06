@@ -26,7 +26,130 @@ function fetchNotifications() {
     showEmptyMessage('waiting-list', 'Loading requests...');
     showEmptyMessage('oncall-list', 'Loading requests...');
     
-    // Fetch requests using the user-specific endpoint
+    // Use the new combined endpoint that returns both own request and all requests
+    fetch(`${baseUrl}/api/user/notifications`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Server responded with ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Fetched notifications data:', data);
+        
+        // Process the user's own request if it exists
+        if (data.has_own_request && data.own_request) {
+            // Store the user's own request in localStorage for other components to use
+            localStorage.setItem('userCurrentRequest', JSON.stringify(data.own_request));
+            
+            // Dispatch an event to notify other components that the user has a request
+            const event = new CustomEvent('userRequestUpdated', { 
+                detail: { request: data.own_request } 
+            });
+            document.dispatchEvent(event);
+        } else {
+            // Clear any stored request
+            localStorage.removeItem('userCurrentRequest');
+        }
+        
+        // Process all requests for the notification panel
+        processAllNotifications(data.all_requests, data.own_request);
+    })
+    .catch(error => {
+        console.error('Error fetching notifications:', error);
+        // Fall back to the legacy methods
+        fetchNotificationsLegacy();
+    });
+}
+
+// Legacy method for fetching notifications
+function fetchNotificationsLegacy() {
+    console.log('Using legacy method to fetch notifications');
+    const token = localStorage.getItem('userToken');
+    if (!token) {
+        return;
+    }
+    
+    // Get user data from localStorage
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const userIdNo = userData.idno;
+    
+    if (!userIdNo) {
+        console.log('No user ID found in localStorage');
+        showEmptyMessage('waiting-list', 'User profile not found');
+        showEmptyMessage('oncall-list', 'User profile not found');
+        return;
+    }
+    
+    // First check for own request
+    fetch(`${baseUrl}/api/user/check_own_request`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Server responded with ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(ownRequest => {
+        // Store the user's own request if it exists
+        if (ownRequest.has_request) {
+            localStorage.setItem('userCurrentRequest', JSON.stringify(ownRequest));
+            
+            // Dispatch an event to notify other components
+            const event = new CustomEvent('userRequestUpdated', { 
+                detail: { request: ownRequest } 
+            });
+            document.dispatchEvent(event);
+        } else {
+            localStorage.removeItem('userCurrentRequest');
+        }
+        
+        // Then fetch all requests for the notification panel
+        return fetch(`${baseUrl}/api/pending_requests`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server responded with ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(allRequests => {
+            processAllNotifications(allRequests, ownRequest.has_request ? ownRequest : null);
+        });
+    })
+    .catch(error => {
+        console.error('Error in legacy notification fetch:', error);
+        showEmptyMessage('waiting-list', 'Error loading requests');
+        showEmptyMessage('oncall-list', 'Error loading requests');
+        
+        // Try the very old method as a last resort
+        fetchVeryLegacyNotifications();
+    });
+}
+
+// Very legacy method as last resort
+function fetchVeryLegacyNotifications() {
+    console.log('Using very legacy method to fetch notifications');
+    const token = localStorage.getItem('userToken');
+    if (!token) {
+        return;
+    }
+    
+    // Get user data from localStorage
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const userIdNo = userData.idno;
+    
+    // Fetch requests using the original endpoint
     fetch(`${baseUrl}/api/user/requests`, {
         headers: {
             'Authorization': `Bearer ${token}`
@@ -39,9 +162,56 @@ function fetchNotifications() {
         return response.json();
     })
     .then(data => {
-        // Split the data into pending and on-call
-        const pendingRequests = data.filter(req => req.status === 'pending');
-        const oncallRequests = data.filter(req => req.status === 'oncall');
+        console.log('Got very legacy notification data:', data);
+        
+        // Find the user's own requests
+        const userRequests = data.filter(req => 
+            req.is_current_user === true || 
+            (req.idno && req.idno === userIdNo)
+        );
+        
+        if (userRequests.length > 0) {
+            // Store the first user request
+            localStorage.setItem('userCurrentRequest', JSON.stringify(userRequests[0]));
+            
+            // Dispatch an event
+            const event = new CustomEvent('userRequestUpdated', { 
+                detail: { request: userRequests[0] } 
+            });
+            document.dispatchEvent(event);
+        }
+        
+        // Process all requests for the notification panel
+        processAllNotifications(data, userRequests[0] || null);
+    })
+    .catch(error => {
+        console.error('Error in very legacy notification fetch:', error);
+        showEmptyMessage('waiting-list', 'Error loading requests');
+        showEmptyMessage('oncall-list', 'Error loading requests');
+    });
+}
+
+// Process all notifications
+function processAllNotifications(allRequests, ownRequest) {
+    // Get user data
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const userIdNo = userData.idno;
+    const userId = userData.id;
+    
+    // Instead of filtering for only user requests, use all requests
+    // Note: We still need to ensure allRequests is an array
+    const requests = Array.isArray(allRequests) ? allRequests : [];
+    
+    // If we have the user's own request but it's not in the list, add it
+    if (ownRequest && !requests.some(req => req.id === ownRequest.id)) {
+        requests.push(ownRequest);
+    }
+    
+    console.log('All requests:', requests);
+    
+    // Split the data into pending and on-call
+    const pendingRequests = requests.filter(req => req.status === 'pending');
+    const oncallRequests = requests.filter(req => req.status === 'oncall');
         
         // Sort requests by schedule time
         const sortByTime = (a, b) => {
@@ -53,18 +223,12 @@ function fetchNotifications() {
         pendingRequests.sort(sortByTime);
         oncallRequests.sort(sortByTime);
         
-        // Update notification badge count
+        // Update notification badge count to show total number of requests
         updateNotificationBadge(pendingRequests.length + oncallRequests.length);
         
         // Render the requests
         renderNotificationList('waiting-list', pendingRequests);
         renderNotificationList('oncall-list', oncallRequests);
-    })
-    .catch(error => {
-        console.error('Error fetching requests:', error);
-        showEmptyMessage('waiting-list', 'Error loading requests');
-        showEmptyMessage('oncall-list', 'Error loading requests');
-    });
 }
 
 // Function to render notification list
@@ -80,9 +244,10 @@ function renderNotificationList(containerId, requests) {
         return;
     }
     
-    // Get current user data to highlight their requests
+    // Get current user data
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    const currentUserId = userData.id;
+    const userIdNo = userData.idno;
+    const userId = userData.id;
     
     let html = '';
     requests.forEach(request => {
@@ -93,10 +258,12 @@ function renderNotificationList(containerId, requests) {
         // Format the date for display
         const scheduleDay = scheduleDate.toLocaleDateString([], { month: 'short', day: 'numeric' });
         
-        // Check if this is the current user's request - use the is_current_user flag if available
-        // Fall back to comparing IDs if the flag is not present
-        const isCurrentUser = request.is_current_user === true || 
-                             (currentUserId && (request.user_id === currentUserId || request.id === currentUserId));
+        // Check if this request belongs to current user
+        const isCurrentUser = 
+            request.is_current_user === true || 
+            (request.idno && request.idno === userIdNo) ||
+            (request.id && (request.id === userId || request.id === userIdNo));
+            
         const currentUserClass = isCurrentUser ? 'current-user' : '';
         
         // Add countdown timer if status is oncall and counter exists
@@ -111,7 +278,7 @@ function renderNotificationList(containerId, requests) {
         html += `
             <div class="notification-item ${currentUserClass}" data-id="${request.id}">
                 ${timerHtml}
-                <div class="name">${request.name || 'Unknown'}</div>
+                <div class="name">${request.name || (isCurrentUser ? userData.name : 'Unknown')}</div>
                 <div class="details">
                     <span class="request-id-text">${request.request_id || ''}</span>
                     <span>${scheduleDay} at ${scheduleTime}</span>
@@ -119,6 +286,7 @@ function renderNotificationList(containerId, requests) {
                 <div class="info-display" style="margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.1);">
                     <span class="info-label">Status:</span>
                     <span class="info-value status ${request.status === 'pending' ? 'waiting' : ''}">${request.status === 'pending' ? 'Waiting' : 'On Call'}</span>
+                    ${isCurrentUser ? '' : ''}
                 </div>
             </div>
         `;
@@ -143,8 +311,6 @@ function initNotifications() {
     document.getElementById('close-notification-btn').addEventListener('click', function() {
         // Close the notifications expanded state
         document.body.classList.remove('notifications-expanded');
-                        // Re-enable scrolling
-                        document.body.style.overflow = '';
         // Re-enable scrolling
         document.body.style.overflow = '';
     });
