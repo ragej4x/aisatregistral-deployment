@@ -356,7 +356,7 @@ const receiptModule = {
             <div class="receipt-modal">
                 <div class="receipt-header">
                     <img src="img/aisat.png" alt="AISAT College" class="receipt-logo">
-                    <div class="receipt-title">Appointment Receipt</div>
+                    <div class="receipt-title"></div>
                     <div class="receipt-close-x" id="receipt-close-x">×</div>
                 </div>
                 <div class="receipt-body">
