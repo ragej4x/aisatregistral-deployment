@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AISAT Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            max-width: 100%;
+            height: auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .hidden {
+            display: none;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .error-message {
+            color: #E74C3C;
+            margin-top: 10px;
+            display: none;
+        }
+        .success-message {
+            color: #2ECC71;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="aisat.png" alt="AISAT College Logo">
+    </div>
+    <br>
+    <br>
+    <h2>Registration Form</h2>
+    <br>
+
+    <form id="registrationForm">
+        <div class="form-group">
+            <label for="idno">ID Number:</label>
+            <input type="text" id="idno" name="idno" required maxlength="6" pattern="\d{6}" title="ID Number must be 6 digits">
+        </div>
+        
+        <div class="form-group">
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" name="firstName" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" name="lastName" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="level">Level:</label>
+            <select id="level" name="level" required>
+                <option value="">Select Level</option>
+                <option value="College">College</option>
+                <option value="SHS">Senior High School</option>
+            </select>
+        </div>
+        
+        <div id="collegeOptions" class="form-group hidden">
+            <label for="course">Course:</label>
+            <select id="course" name="course">
+                <option value="">Select Course</option>
+                <option value="BS Computer Science">BS Computer Science</option>
+                <option value="BS Criminology">BS Criminology</option>
+                <option value="BS Tourism Management">BS Tourism Management</option>
+                <option value="BS Accounting Information System">BS Accounting Information System</option>
+                <option value="BS Office Administration">BS Office Administration</option>
+            </select>
+        </div>
+        
+        <div id="shsOptions" class="form-group hidden">
+            <label for="strand">Strand:</label>
+            <select id="strand" name="strand">
+                <option value="">Select Strand</option>
+                <option value="STEM">STEM</option>
+                <option value="ABM">ABM</option>
+                <option value="HUMSS">HUMSS</option>
+                <option value="GAS">GAS</option>
+                <option value="ICT-CP">ICT-CP</option>
+                <option value="ICT-CSS">ICT-CSS</option>
+                <option value="TVL-COOKERY">TVL-COOKERY</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <button type="submit" id="submitBtn">Register</button>
+        </div>
+        
+        <div class="loading" id="loadingIndicator">
+            Processing registration...
+        </div>
+        
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+    </form>
+
+    <script>
+        // API Base URL
+        const BASE_URL = "https://jimboyaczon.pythonanywhere.com";
+        
+        document.getElementById('level').addEventListener('change', function() {
+            const collegeOptions = document.getElementById('collegeOptions');
+            const shsOptions = document.getElementById('shsOptions');
+            const courseSelect = document.getElementById('course');
+            const strandSelect = document.getElementById('strand');
+            
+            // Reset selections
+            courseSelect.selectedIndex = 0;
+            strandSelect.selectedIndex = 0;
+            
+            // Show/hide appropriate options based on level selection
+            if (this.value === 'College') {
+                collegeOptions.classList.remove('hidden');
+                shsOptions.classList.add('hidden');
+                courseSelect.setAttribute('required', 'required');
+                strandSelect.removeAttribute('required');
+            } else if (this.value === 'SHS') {
+                shsOptions.classList.remove('hidden');
+                collegeOptions.classList.add('hidden');
+                strandSelect.setAttribute('required', 'required');
+                courseSelect.removeAttribute('required');
+            } else {
+                collegeOptions.classList.add('hidden');
+                shsOptions.classList.add('hidden');
+                courseSelect.removeAttribute('required');
+                strandSelect.removeAttribute('required');
+            }
+        });
+
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Show loading indicator and hide messages
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('submitBtn').disabled = true;
+            
+            // Get form values
+            const idno = document.getElementById('idno').value;
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const fullName = firstName + ' ' + lastName; // Combine first and last name
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const level = document.getElementById('level').value;
+            
+            // Validate required fields
+            if (!idno || !firstName || !lastName || !email || !password || !level) {
+                showError("All fields are required");
+                return;
+            }
+            
+            // Validate ID number is 6 digits
+            if (!(/^\d{6}$/.test(idno))) {
+                showError("ID number must be 6 digits");
+                return;
+            }
+            
+            // Get course or strand based on level
+            let course = 'N/A';
+            let strand = 'N/A';
+            
+            if (level === 'College') {
+                course = document.getElementById('course').value || 'N/A';
+            } else if (level === 'SHS') {
+                strand = document.getElementById('strand').value || 'N/A';
+            }
+            
+            // Create data object to send to server
+            const userData = {
+                level: level,
+                name: fullName,
+                course: level === "College" ? course : null,
+                strand: level === "SHS" ? strand : null,
+                idno: idno,
+                cell: 'N/A',
+                email: email,
+                password: password
+            };
+            
+            try {
+                // Send registration request to the API
+                const response = await fetch(`${BASE_URL}/api/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+                
+                const responseData = await response.json();
+                
+                if (response.ok) {
+                    // Show success message
+                    showSuccess(`Registration successful! Welcome, ${fullName}. You can now login with your credentials.`);
+                    // Reset the form
+                    document.getElementById('registrationForm').reset();
+                    // Reset course/strand options
+                    document.getElementById('collegeOptions').classList.add('hidden');
+                    document.getElementById('shsOptions').classList.add('hidden');
+                } else {
+                    // Show error message
+                    const errorMessage = responseData.message || 'Registration failed. Please try again.';
+                    showError(errorMessage);
+                }
+            } catch (error) {
+                showError(`Connection error: ${error.message}`);
+            } finally {
+                // Hide loading indicator and re-enable submit button
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('submitBtn').disabled = false;
+            }
+        });
+        
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('submitBtn').disabled = false;
+        }
+        
+        function showSuccess(message) {
+            const successElement = document.getElementById('successMessage');
+            successElement.textContent = message;
+            successElement.style.display = 'block';
+            document.getElementById('loadingIndicator').style.display = 'none';
+        }
+    </script>
+</body>
+</html> 
